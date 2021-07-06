@@ -9,29 +9,41 @@ import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
 
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "key_data_store")
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "my_data_store")
 
-class UserPreferences (@ApplicationContext context: Context){
+class UserPreferences @Inject constructor(@ApplicationContext context: Context) {
 
     private val appContext = context.applicationContext
 
-    val authToken:Flow<String?>
-    get() = appContext.dataStore.data.map { preferences ->
-        preferences[KEY_AUTH]
+    val accessToken: Flow<String?>
+        get() = appContext.dataStore.data.map { preferences ->
+            preferences[ACCESS_TOKEN]
+        }
+
+    val refreshToken: Flow<String?>
+        get() = appContext.dataStore.data.map { preferences ->
+            preferences[REFRESH_TOKEN]
+        }
+
+    suspend fun saveAccessTokens(accessToken: String, refreshToken: String) {
+        appContext.dataStore.edit { preferences ->
+            preferences[ACCESS_TOKEN] = accessToken
+            preferences[REFRESH_TOKEN] = refreshToken
+        }
     }
 
-    suspend fun saveAuthToken(authToken:String){
+    suspend fun clear() {
         appContext.dataStore.edit { preferences ->
-            preferences[KEY_AUTH] = authToken
+            preferences.clear()
         }
     }
 
     companion object {
-        private val KEY_AUTH = stringPreferencesKey("key_access_token")
-        //private val REFRESH_TOKEN = stringPreferencesKey("key_refresh_token")
+        private val ACCESS_TOKEN = stringPreferencesKey("key_access_token")
+        private val REFRESH_TOKEN = stringPreferencesKey("key_refresh_token")
     }
 
 }
-

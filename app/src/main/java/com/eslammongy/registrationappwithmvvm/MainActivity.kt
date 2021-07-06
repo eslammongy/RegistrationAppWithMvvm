@@ -9,17 +9,18 @@ import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
 import com.eslammongy.registrationappwithmvvm.data.UserPreferences
+import com.eslammongy.registrationappwithmvvm.ui.home.HomeActivity
+import com.eslammongy.registrationappwithmvvm.ui.startNewActivity
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val intent = Intent(this , AuthActivity::class.java)
         val userPreferences = UserPreferences(this)
         userPreferences.authToken.asLiveData().observe(this , Observer {
-            Toast.makeText(this, it ?: "Token Is Null", Toast.LENGTH_SHORT).show()
-            Handler(Looper.getMainLooper()).postDelayed({ startActivity(intent) } , 2000)
+            val activityShouldBeStart = if (it == null) AuthActivity::class.java else HomeActivity::class.java
+            Handler(Looper.getMainLooper()).postDelayed({ startNewActivity(activityShouldBeStart) } , 2000)
 
         })
     }
